@@ -20,7 +20,9 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@fontsource/roboto": "^5.2.9",
     "electron-updater": "^6.3.9",
+    "vue-router": "^4.6.4",
     "vuetify": "^3.11.8",
     "yoyosqlite": "^2.0.0"
   },

@@ -1,34 +1,10 @@
-# kpapi
+# 前言
+Postman真TM难用，一气之下自己写了一个基于node-axios请求的electronPC应用
 
-An Electron application with Vue
+# 功能描述 
+- 无账户系统！无需登录使用！
+- 支持Collection V1/V2标准接口json文件导入（在postman将你的项目接口导出然后搬家到我这里，嘻嘻）
 
-## Recommended IDE Setup
-
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
-
-## Project Setup
-
-### Install
-
-```bash
-$ npm install
-```
-
-### Development
-
-```bash
-$ npm run dev
-```
-
-### Build
-
-```bash
-# For windows
-$ npm run build:win
-
-# For macOS
-$ npm run build:mac
-
-# For Linux
-$ npm run build:linux
-```
+# 不支持的功能
+- 团队协作
+- AI接入
