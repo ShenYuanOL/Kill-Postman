@@ -21,7 +21,7 @@
         从右边选择一个接口以开始
     </div>
 
-    <v-sheet v-else elevation="4" class="pa-0">
+    <v-sheet v-else elevation="4" class="pa-0 h-100">
         <v-tabs color="primary" v-model="tab" center-active show-arrows density="comfortable">
             <v-tab v-for="(item, index) in selected" :key="item.title" :value="index">
                 <span class="text-caption d-inline-block text-truncate" style="max-width: 80px;">{{ item.title
