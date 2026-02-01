@@ -21,11 +21,11 @@
         从右边选择一个接口以开始
     </div>
 
-    <v-sheet v-else elevation="4" class="pa-0 h-100">
+    <v-sheet v-else elevation="4" class="pa-0 h-100 d-flex flex-column">
         <v-tabs color="primary" v-model="tab" center-active show-arrows density="comfortable">
             <v-tab v-for="(item, index) in selected" :key="item.title" :value="index">
                 <span class="text-caption d-inline-block text-truncate" style="max-width: 80px;">{{ item.title
-                }}</span>
+                    }}</span>
                 <template v-slot:append>
                     <v-btn icon size="25" class="ml-2" @click.stop="handleClose(item)">
                         <v-icon size="14">mdi-close</v-icon>
@@ -36,7 +36,9 @@
 
         <v-divider></v-divider>
 
-        <useApi :api="selectedFace" />
+        <v-sheet class="flex-1-1-100 overflow-hidden">
+            <useApi :api="selectedFace" />
+        </v-sheet>
     </v-sheet>
 </template>
 <script>

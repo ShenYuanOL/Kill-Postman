@@ -1,10 +1,10 @@
 <template>
-    <v-card class="h-100">
+    <v-card class="h-100 d-flex flex-column">
         <v-card-item>
             <v-text-field density="comfortable">
                 <template v-slot:prepend>
                     <v-chip v-if="api.type" :color="type[api.type].color" text-color="white">{{ type[api.type].name
-                    }}</v-chip>
+                        }}</v-chip>
                 </template>
                 <template v-slot:append>
                     <v-btn icon>
@@ -14,9 +14,9 @@
             </v-text-field>
         </v-card-item>
         <v-sheet class="h-100">
-            <v-row class="h-100" no-gutters>
+            <v-row class="h-100 ma-0">
                 <!-- 请求体 -->
-                <v-col cols="12">
+                <v-col class="pa-0" cols="12">
                     <v-card class="pa-1 h-100">
                         <!-- <v-card-title>请求体</v-card-title> -->
                         <v-card-item class="pa-0">
@@ -74,16 +74,67 @@
                                     </template>
                                 </v-data-table-virtual>
                             </v-sheet>
-                            <v-sheet
-                                v-if="this.postData.postType == 'x-www-form-urlencoded'">x-www-form-urlencoded</v-sheet>
-                            <v-sheet v-if="this.postData.postType == 'raw'">raw</v-sheet>
-                            <v-sheet v-if="this.postData.postType == 'binary'">binary</v-sheet>
+                            <v-sheet v-if="this.postData.postType == 'x-www-form-urlencoded'" class="border">
+                                <v-data-table-virtual :headers="formDataHeaders"
+                                    :items="requestBody['x-www-form-urlencoded']" :height="180" density="compact"
+                                    fixed-header fixed-footer>
+                                    <!-- 传入列 -->
+                                    <template v-slot:item.need="{ item, index }">
+                                        <v-radio v-model="item.need" density="compact"
+                                            @click="item.need = !item.need"></v-radio>
+                                    </template>
+
+                                    <!-- 参数名列 -->
+                                    <template v-slot:item.name="{ item }">
+                                        <v-text-field v-model="item.name" variant="underlined" hide-details
+                                            density="compact"></v-text-field>
+                                    </template>
+
+                                    <!-- 值列 -->
+                                    <template v-slot:item.value="{ item, index }">
+                                        <v-text-field v-model="item.value" variant="underlined" hide-details
+                                            density="compact">
+                                            <template v-slot:append-inner>
+                                                <v-btn icon size="20" variant="plain"
+                                                    @click="OpenTextEditor_FormData(index, 'value')">
+                                                    <v-icon size="16">mdi-unfold-more-vertical</v-icon>
+                                                </v-btn>
+                                            </template>
+                                        </v-text-field>
+                                    </template>
+
+                                    <!-- 备注列 -->
+                                    <template v-slot:item.remark="{ item, index }">
+                                        <v-text-field v-model="item.remark" variant="underlined" hide-details
+                                            density="compact">
+                                            <template v-slot:append-inner>
+                                                <v-btn icon size="20" variant="plain"
+                                                    @click="OpenTextEditor_FormData(index, 'remark')">
+                                                    <v-icon>mdi-unfold-more-vertical</v-icon>
+                                                </v-btn>
+                                            </template>
+                                        </v-text-field>
+                                    </template>
+
+                                    <!-- 底部新增按钮 -->
+                                    <template v-slot:bottom>
+                                        <div class="w-100 text-end pa-2 border-t">
+                                            <v-btn size="small" @click="AddLineFormData()">新增</v-btn>
+                                        </div>
+                                    </template>
+                                </v-data-table-virtual>
+                            </v-sheet>
+                            <v-sheet v-if="this.postData.postType == 'raw'">
+                                <v-textarea v-model="requestBody.raw" hide-details></v-textarea>
+                            </v-sheet>
+                            <v-sheet v-if="this.postData.postType == 'binary'">1
+                            </v-sheet>
                             <v-sheet v-if="this.postData.postType == 'graphQL'">graphQL</v-sheet>
                         </v-card-item>
                     </v-card>
                 </v-col>
                 <!-- 响应体 -->
-                <v-col cols="12">
+                <v-col class="pa-0" cols="12">
                     <v-card class="pa-1 h-100">
                         <!-- <v-card-title>响应体</v-card-title> -->
                         <v-card-item class="pa-0">
@@ -145,7 +196,7 @@ export default {
                 data: null
             },
 
-            // form-data 表格列定义
+            // form-data/x-www-form-urlencoded 表格列定义
             formDataHeaders: [
                 { key: 'need', title: '传入', sortable: false, width: '80px' },
                 { key: 'name', title: '参数名', sortable: false },
@@ -176,7 +227,26 @@ export default {
                         'remark': '这是c的备注'
                     }
                 ],
-                'x-www-form-urlencoded': null,
+                'x-www-form-urlencoded': [
+                    {
+                        'need': true,
+                        'name': 'a',
+                        'value': '1',
+                        'remark': '这是a的备注'
+                    },
+                    {
+                        'need': false,
+                        'name': 'b',
+                        'value': '2',
+                        'remark': '这是b的备注'
+                    },
+                    {
+                        'need': true,
+                        'name': 'c',
+                        'value': '3',
+                        'remark': '这是c的备注'
+                    }
+                ],
                 'raw': null,
                 'binary': null,
                 'graphQL': null
