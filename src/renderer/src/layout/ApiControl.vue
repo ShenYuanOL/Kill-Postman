@@ -40,7 +40,7 @@
         <v-divider></v-divider>
 
         <v-sheet class="flex-1-1-100 overflow-hidden">
-            <useApi :api="selectedFace" />
+            <useApi :api="selectedFace" :key="selectedFace ? selectedFace.title : 'none'" />
         </v-sheet>
     </v-sheet>
 
@@ -54,7 +54,7 @@
                         <v-text-field label="项目名" v-model="OBJData.name"></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                        <v-text-field label="BaseURL" v-model="OBJData.BaseURL"></v-text-field>
+                        <v-text-field label="BaseURL" v-model="Global.BaseURL"></v-text-field>
                     </v-col>
                 </v-row>
             </v-card-item>
@@ -65,7 +65,7 @@
     </v-dialog>
 </template>
 <script>
-import useApi from '../view/useApi.vue'
+import useApi from '../view/useApi.vue';
 import { Global } from '../store/Global';
 
 export default {
@@ -145,13 +145,13 @@ export default {
                 }
             ],
             tab: null
-        }
+        };
     },
     watch: {
         // 监听标签页切换，更新选中的接口
         tab(newTab) {
             if (newTab !== null && this.selected[newTab]) {
-                this.selectedFace = this.selected[newTab]
+                this.selectedFace = this.selected[newTab];
             }
         }
     },
@@ -159,56 +159,57 @@ export default {
         handleActivated(activated) {
             // activated 是一个包含被激活项的值的数组
             if (activated && activated.length > 0) {
-                const activatedTitle = activated[0]
+                const activatedTitle = activated[0];
 
                 // 查找对应的item对象
                 const findItem = (items, title) => {
                     for (const item of items) {
                         if (item.title === title) {
-                            return item
+                            return item;
                         }
                         if (item.children) {
-                            const found = findItem(item.children, title)
-                            if (found) return found
+                            const found = findItem(item.children, title);
+                            if (found) return found;
                         }
                     }
-                    return null
-                }
+                    return null;
+                };
 
-                const item = findItem(this.items, activatedTitle)
+                const item = findItem(this.items, activatedTitle);
+                console.log(item);
 
                 if (item && item.type) {
                     // 检查是否已经存在于selected中，避免重复添加
-                    const exists = this.selected.some((s) => s.title === item.title)
+                    const exists = this.selected.some((s) => s.title === item.title);
                     if (!exists) {
-                        this.selected.push(item)
+                        this.selected.push(item);
                         // 切换到新添加的标签页
-                        this.tab = this.selected.length - 1
-                        this.selectedFace = item
+                        this.tab = this.selected.length - 1;
+                        this.selectedFace = item;
                     } else {
                         // 如果已存在，切换到对应的标签页
-                        const index = this.selected.findIndex((s) => s.title === item.title)
-                        this.tab = index
-                        this.selectedFace = item
+                        const index = this.selected.findIndex((s) => s.title === item.title);
+                        this.tab = index;
+                        this.selectedFace = item;
                     }
                 }
             }
         },
         handleClose(item) {
-            const index = this.selected.indexOf(item)
-            if (index === -1) return
+            const index = this.selected.indexOf(item);
+            if (index === -1) return;
 
-            const currentTab = this.tab
-            this.selected.splice(index, 1)
+            const currentTab = this.tab;
+            this.selected.splice(index, 1);
 
             if (this.selected.length === 0) {
-                this.tab = null
-                this.selectedFace = null
+                this.tab = null;
+                this.selectedFace = null;
             } else if (index === currentTab) {
-                const newIndex = index > 0 ? index - 1 : 0
-                this.tab = newIndex
+                const newIndex = index > 0 ? index - 1 : 0;
+                this.tab = newIndex;
             } else if (index < currentTab) {
-                this.tab = currentTab - 1
+                this.tab = currentTab - 1;
             }
         },
 
@@ -216,9 +217,9 @@ export default {
          * @name 项目设置按钮
          */
         SettingOBJ() {
-            this.state.SettingOBJ = !this.state.SettingOBJ
+            this.state.SettingOBJ = !this.state.SettingOBJ;
         }
     }
-}
+};
 </script>
 <style scoped></style>

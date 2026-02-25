@@ -296,19 +296,75 @@
                 <!-- 响应体 -->
                 <v-col class="pa-0" cols="12">
                     <v-card class="pa-1 h-100">
-                        <!-- <v-card-title>响应体</v-card-title> -->
-                        <v-card-item class="pa-0">
-                            <v-select label=" 响应体" v-model="resData.resType" :items="resType" variant="outlined"
-                                density="compact" max-width="200" hide-details class="mt-2"></v-select>
+                        <!-- 状态栏 -->
+                        <v-card-item class="pa-1" v-if="resData.code !== null || resData.error">
+                            <div class="d-flex align-center" style="gap: 8px;">
+                                <v-chip v-if="resData.code" size="small" :color="statusColor" variant="flat" label>
+                                    {{ resData.code }}
+                                </v-chip>
+                                <span v-if="resData.time !== null" class="text-caption text-medium-emphasis">
+                                    {{ resData.time }} ms
+                                </span>
+                                <v-chip v-if="resData.error" size="small" color="red" variant="flat" label>
+                                    网络错误
+                                </v-chip>
+                            </div>
                         </v-card-item>
-                        <v-card-item class="px-0 pt-2">
-                            <v-sheet v-if="resData.resType == 'xml'">xml</v-sheet>
-                            <v-sheet v-if="resData.resType == 'json'">json</v-sheet>
-                            <v-sheet v-if="resData.resType == 'text'">text</v-sheet>
-                            <v-sheet v-if="resData.resType == 'html'">
-                                <v-sheet v-html="resData.data"></v-sheet>
-                            </v-sheet>
-                        </v-card-item>
+
+                        <!-- 响应选项卡 -->
+                        <v-tabs v-model="state.response_tab" slider-color="purple-lighten-3" color="cyan" inset
+                            density="compact">
+                            <v-tab value="body">Body</v-tab>
+                            <v-tab value="headers">Headers</v-tab>
+                        </v-tabs>
+
+                        <v-tabs-window v-model="state.response_tab">
+                            <!-- Body -->
+                            <v-tabs-window-item value="body">
+                                <!-- 网络错误提示 -->
+                                <v-sheet v-if="resData.error" class="pa-3 mt-2 rounded"
+                                    style="background: #ffebee;">
+                                    <div class="d-flex align-center">
+                                        <v-icon color="red" class="mr-2" size="18">mdi-alert-circle</v-icon>
+                                        <span class="text-body-2 font-weight-medium"
+                                            style="color: #c62828;">请求失败</span>
+                                    </div>
+                                    <div class="text-caption mt-1" style="color: #b71c1c;">{{ resData.error }}</div>
+                                </v-sheet>
+
+                                <v-card-item class="pa-0">
+                                    <v-select label="响应格式" v-model="resData.resType" :items="resType"
+                                        variant="outlined" density="compact" max-width="200" hide-details
+                                        class="mt-2"></v-select>
+                                </v-card-item>
+
+                                <v-card-item class="px-0 pt-2" v-if="resData.data !== null">
+                                    <v-sheet v-if="resData.resType === 'json'">
+                                        <pre class="ma-0 pa-2"
+                                            style="white-space: pre-wrap; overflow-x: auto;">{{ formattedJson }}</pre>
+                                    </v-sheet>
+                                    <v-sheet v-if="resData.resType === 'xml'">
+                                        <pre class="ma-0 pa-2" style="white-space: pre-wrap;">{{ resData.data }}</pre>
+                                    </v-sheet>
+                                    <v-sheet v-if="resData.resType === 'text'">{{ resData.data }}</v-sheet>
+                                    <v-sheet v-if="resData.resType === 'html'" v-html="resData.data"></v-sheet>
+                                </v-card-item>
+                            </v-tabs-window-item>
+
+                            <!-- Headers -->
+                            <v-tabs-window-item value="headers">
+                                <v-sheet v-if="resData.headers" class="mt-2">
+                                    <div v-for="(value, key) in resData.headers" :key="key"
+                                        class="d-flex text-caption py-1 border-b px-1">
+                                        <span class="font-weight-bold mr-3"
+                                            style="min-width: 160px; word-break: break-all;">{{ key }}</span>
+                                        <span class="text-medium-emphasis"
+                                            style="word-break: break-all;">{{ value }}</span>
+                                    </div>
+                                </v-sheet>
+                                <v-sheet v-else class="text-caption text-medium-emphasis pa-2">暂无响应头</v-sheet>
+                            </v-tabs-window-item>
+                        </v-tabs-window>
                     </v-card>
                 </v-col>
             </v-row>
@@ -333,15 +389,29 @@ export default {
          * 传入格式以及相关参数的解释
          * BaseURL: false/true 是否继承项目的 BaseURL
          * Auth: {
-         *  
-         * }
+         *  type: 'none/Basic/Bearer/OAuth2/API Key',
+         *  basic: { 
+         *   username: '',
+         *   password: ''
+         *  },
+         * bearer: {
+         *   token: ''
+         *  },
+         * apiKey: { 
+         *   name: '',
+         *   key: '',
+         *  }
+         * },
+         * headers: [
+         *   { name: '', value: '' },
+         *   ...
+         * ],
          * postDataL{
          *  type: GET/POST/PUT/DELETE/PATCH/HEAD/OPTIONS, 请求类型
          *  url: '', 如果没有继承BaseURL这里是完整的http地址，否则是接口地址
          *  postType: 'none/form-data/x-www-form-urlencoded/raw/binary/graphQL', 请求体数据类型
-         *  body: null, 请求体数据
+         *  body: null, 请求体数据··
          *  params: [], 请求参数
-         *  headers: [] 请求头
          * }
          */
         api: Object
@@ -352,6 +422,7 @@ export default {
             // 页面状态数据
             state: {
                 request_tab: 'body',
+                response_tab: 'body',
                 loading: false,
                 SendFieldError: ''
             },
@@ -371,8 +442,7 @@ export default {
                 url: '',
                 postType: 'none',
                 body: null, // TODO 发送请求时的数据来源应该是这里，而不是在以下的数据结构容器中开始，后面需要将发送的数据指向到这里
-                params: [],
-                headers: []
+                params: []
             },
 
             resType: ['xml', 'json', 'text', 'html'],
@@ -382,7 +452,8 @@ export default {
                 code: null,
                 data: null,
                 headers: null,
-                error: null
+                error: null,
+                time: null
             },
 
             // form-data/x-www-form-urlencoded 表格列定义
@@ -478,6 +549,24 @@ export default {
             }
         };
     },
+    computed: {
+        statusColor() {
+            const code = this.resData.code;
+            if (!code) return 'grey';
+            if (code < 200) return 'blue';
+            if (code < 300) return 'green';
+            if (code < 400) return 'cyan';
+            if (code < 500) return 'orange';
+            return 'red';
+        },
+        formattedJson() {
+            const data = this.resData.data;
+            if (data === null || data === undefined) return '';
+            if (typeof data === 'object') return JSON.stringify(data, null, 2);
+            try { return JSON.stringify(JSON.parse(data), null, 2); }
+            catch { return String(data); }
+        }
+    },
     created() {
         // 处理该接口的前置条件
 
@@ -543,7 +632,7 @@ export default {
 
             // 检查当前是否为有效请求
             if (this.postData.url === '' || this.postData.url === null) {
-                this.state.SendFieldError = 'URL不能为空'
+                this.state.SendFieldError = 'URL不能为空';
             }
             // 1. 构建请求头：合并 requestHeaders 中启用的项
             const headers = {};
@@ -598,26 +687,40 @@ export default {
             this.resData.code = null;
             this.resData.headers = null;
             this.resData.error = null;
+            this.resData.time = null;
 
+            const detectResType = (headers) => {
+                const ct = (headers?.['content-type'] || '').toLowerCase();
+                if (ct.includes('application/json')) return 'json';
+                if (ct.includes('text/html')) return 'html';
+                if (ct.includes('xml')) return 'xml';
+                return 'text';
+            };
+
+            const startTime = Date.now();
             try {
                 const response = await axios({
                     method: this.postData.type,
                     url: this.postData.url,
-                    baseURL: '' || this.Global.BaseURL, // TODO 当前项目的全局 BaseURL
+                    baseURL: '' || this.Global.BaseURL,
                     headers,
                     params,
                     data
                 });
 
+                this.resData.time = Date.now() - startTime;
                 this.resData.code = response.status;
                 this.resData.data = response.data;
                 this.resData.headers = response.headers;
+                this.resData.resType = detectResType(response.headers);
             } catch (err) {
+                this.resData.time = Date.now() - startTime;
                 if (err.response) {
                     // 服务器有响应，但状态码为 4xx/5xx
                     this.resData.code = err.response.status;
                     this.resData.data = err.response.data;
                     this.resData.headers = err.response.headers;
+                    this.resData.resType = detectResType(err.response.headers);
                 } else {
                     // 网络错误 / 超时 / 跨域等
                     this.resData.error = err.message;
